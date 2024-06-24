@@ -18,9 +18,9 @@ Access to protective measures like masks is crucial for public health, especiall
 Research Question: How is the NC mask ban going to affect the immunocompromised people living in NC?
 
 FOCUS 
-##Find 
-###Masking rates by county
-###Risk factors for covid by county
-###Cenus data??  To compare vulnerabilities  by magnalzations
-###Covid death rates by county 
+Find:
+Masking rates by county
+Risk factors for covid by county
+Cenus data??  To compare vulnerabilities  by magnalzation
+Covid death rates by county 
 
