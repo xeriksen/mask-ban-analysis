@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"></script>
+    <script>
+      
+    </script>
+    <script src="//js.honeybadger.io/v6.5/honeybadger.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+      Honeybadger.configure({
+        apiKey: 'f07b0c1b',
+        environment: 'prod',
+        debug: false,
+        onerror: true
+      });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-80J719XWE5"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  const debug = false
+  gtag('js', new Date());
+  // To turn off debug mode, exclude the parameter altogether (cannot just set to false)
+  // See https://support.google.com/analytics/answer/7201382?hl=en#zippy=%2Cgoogle-tag-websites
+  const args = {
+    'collection': document.querySelector('link[rel="up"]')?.getAttribute('href')
+  }
+  if (debug) {
+    args["debug_mode"] = debug
+  }
+  gtag('config', 'G-80J719XWE5', args)
+</script>
+<script src="https://unpkg.com/ahoy.js@0.4.3"
+  integrity="sha384-s9X57Wbu8jIIErBMhudZJEAS1ZkelgbMI7/HUqsgjFBBm9IXyfbpKQ+ZoWUUvpgE"
+  crossorigin="anonymous"></script>
+<script>
+  // Set up Ahoy
+  ahoy.configure({
+    visitDuration: 60, // measured in minutes; this is Zenodo's default
+    cookies: false, // use anonymity sets instead
+    urlPrefix: "https://sdr-metrics-api-prod.stanford.edu",
+  });
+</script>
+
+    
+    <link rel="stylesheet" href="/assets/m3-6a7dd775.css" />
+    <link rel="stylesheet" href="/assets/sul_icons-4aca11b5.css" />
+    <link rel="up" href="https://purl.stanford.edu/kv784nx1963" />
+  </head>
+  <body>
+    <div class="sul-embed-container" id='sul-embed-object' hidden>
+  <div class='sul-embed-body sul-embed-m3'>
+    <div
+      id='sul-embed-m3'
+      class='m3'
+      data-m3-uri='https://purl.stanford.edu/gd264gh4518/iiif/manifest'
+      data-canvas-id=''
+      data-canvas-index=''
+      data-hide-title='false'
+      data-show-attribution='false'
+      data-cdl='false'
+      data-search=''
+      data-cdl-hold-record-id=''
+      data-suggested-search=''>
+    </div>
+
+    <script src="/packs/js/runtime-ade0f3ef99f8cb65807f.js" defer="defer"></script>
+<script src="/packs/js/751-d5da01df2b3b904eb628.js" defer="defer"></script>
+<script src="/packs/js/m3-322d82eba45221bb2eac.js" defer="defer"></script>
+  </div>
+</div>
+
+  </body>
+</html>
