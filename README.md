@@ -16,10 +16,10 @@ The North Carolina mask ban, as outlined in NC HB 237, is set to have profound i
 Access to protective measures like masks is crucial for public health, especially during pandemics. This project aims to highlight the anticipated disproportionate effects of the mask ban on these already vulnerable populations, underscoring the need for careful consideration and mitigation strategies to protect public health and human rights. For this analysis, we will use publicly available data to investigate how the mask ban policy intersects with the demographics and socioeconomic status of affected populations.
 
 Research Question:
-    How is the NC mask ban going to affect the immunocompromised people living in NC?
-                    OR
-    How many immunocompromised people does the NC mask ban have the potential to affect?
-
+    How many immunocompromised people  and covid cautious people does the NC mask ban have the potential to affect?
+                Later answer bigger research question..    
+            How is the NC mask ban going to affect the immunocompromised people living in NC?
+                
 FOCUS 
 Find:
 NYtimes data: Masking rates by county
