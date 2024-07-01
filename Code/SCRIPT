@@ -1,7 +1,7 @@
 
-##PSEUDO CODE 
+##PSEUDO CODE
 
-#LOAD PACKAGES 
+#LOAD PACKAGES
 pacman::p_load( rio,tidyverse, janitor, psych, gtsummary, here, readxl, pacman, EpiSewer, ggplot2, data.table)
 
 #IMPORT NYTIMES DATA - MASK USE BY COUNTY
@@ -25,13 +25,29 @@ nyt_covid_rates_by_nc_county <- nyt_covid_rates_by_county%>%
 "2020_07_nyt_nc_county_info" <- nyt_nc_county_info %>%
   filter(date >= as.Date("2020-07-02") & date <= as.Date("2020-07-14"))
 
-#FILTER 2020-07-02 to 2020-07-14 FROM NYTIMES NC DATA - COVID RATES BY COUNTY--won't open
-"2020_07_nyt_covid_rates_by_nc_county" <- nyt_covid_rates_by_nc_county%>%
+#FILTER 2020-07-02 to 2020-07-14 FROM NYTIMES NC DATA - COVID RATES BY COUNTY
+"nyt_covid_rates_by_nc_county_during_mask_study" <- nyt_covid_rates_by_nc_county %>%
   filter(date >= as.Date("2020-07-02") & date <= as.Date("2020-07-14"))
 
-#IMPORT CDC DATA - National Immunization data 2024 
-CDC_National_Immunization_data_2024  <- import("~/Desktop/ENABLE/ENABLE mask ban analysis/National_Immunization_Survey_Adult_COVID_Module__NIS-ACM___COVIDVaxViews__Data___Centers_for_Disease_Control_and_Prevention__cdc.gov__20240627.csv")
+#IMPORT CDC DATA - National Immunization data 2024
+CDC_National_Immunization_data_2024 <- import("~/Desktop/ENABLE/ENABLE mask ban analysis/National_Immunization_Survey_Adult_COVID_Module__NIS-ACM___COVIDVaxViews__Data___Centers_for_Disease_Control_and_Prevention__cdc.gov__20240627.csv")
 
-#FILTER NC FAROM CDC DATA - National Immunization data 2024 
+#FILTER NC FAROM CDC DATA - National Immunization data 2024
 CDC_nc_Immunization_data_2024 <- CDC_National_Immunization_data_2024 %>%
   filter(Geography == "North Carolina")
+
+#INSTALL EPISEWER & CMDSTAN
+remotes::install_github("adrian-lison/EpiSewer", dependencies = TRUE)
+cmdstanr::check_cmdstan_toolchain()
+cmdstanr::install_cmdstan(cores = 2) # use more cores to speed up
+
+#RENAME COLUMN COUNTFP TO FIPS IN NYT MASK USE BY NC COUNTY
+nyt_mask_use_by_nc_county_fips <- nyt_mask_use_by_nc_county%>%
+  rename(fips = COUNTYFP)
+
+#LEFT JOIN COVID RATES BY NC COUNTY TO MASK USE BY NC COUNTY
+"nyt_covid_rates_by_nc_county_with_mask_study" <- nyt_mask_use_by_nc_county_fips %>%
+  left_join(nyt_covid_rates_by_nc_county_during_mask_study, by = "fips")
+
+#IMPORT 2020 POPULATION DATA NC BY COUNTY
+nc_population_data_by_nc_county <- import("~/Desktop/ENABLE/ENABLE mask ban analysis/ENABLE-mask-ban-/Data/county-population-totals-2.csv")
