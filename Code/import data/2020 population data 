@@ -11,8 +11,8 @@ nc_population_data_by_county <- nc_population_data_by_county%>%
 
 #RENAME VALUE TO POPULATION IN DATA
 nc_population_data_by_county <- nc_population_data_by_county%>%
- select(-county)
+ select(-County)
 
 #CLEAN NAMES POPULATION DATA BY COUNTY
-> nc_population <- nc_population_data_by_county  %>%
-+     janitor::clean_names()
+nc_population <- nc_population_data_by_county  %>%
+    janitor::clean_names()

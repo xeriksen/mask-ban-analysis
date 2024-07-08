@@ -10,6 +10,6 @@ nyt_mask_use_by_nc_county_fips <- nyt_mask_use_by_nc_county%>%
   rename(fips = COUNTYFP)
 
 mask_use_study <- nyt_mask_use_by_nc_county %>%
-+     janitor::clean_names()
+    janitor::clean_names()
 
 
