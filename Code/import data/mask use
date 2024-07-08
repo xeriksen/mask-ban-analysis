@@ -7,9 +7,10 @@ nyt_mask_use_by_nc_county <- nyt_mask_use_by_county %>%
 
 #RENAME COLUMN COUNTFP TO FIPS IN NYT MASK USE BY NC COUNTY 
 nyt_mask_use_by_nc_county_fips <- nyt_mask_use_by_nc_county%>%
-  rename(fips = COUNTYFP)
+  rename(fips= COUNTYFP)
 
-mask_use_study <- nyt_mask_use_by_nc_county %>%
+#CLEAN NAMES NYT MASK USE BY NC COUNTY
+mask_use_study <- nyt_mask_use_by_nc_county_fips %>%
     janitor::clean_names()
 
 

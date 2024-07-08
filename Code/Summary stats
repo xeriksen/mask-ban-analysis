@@ -1,0 +1,5 @@
+#GET SUMMARY STATS FOR MAIN DATA
+summary(main_data)
+
+#GET SUMMARY STATS FOR CDC DATA
+summary(CDC_data_current)
