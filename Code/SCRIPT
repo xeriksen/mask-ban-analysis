@@ -51,3 +51,22 @@ nyt_mask_use_by_nc_county_fips <- nyt_mask_use_by_nc_county%>%
 
 #IMPORT 2020 POPULATION DATA NC BY COUNTY
 nc_population_data_by_nc_county <- import("~/Desktop/ENABLE/ENABLE mask ban analysis/ENABLE-mask-ban-/Data/county-population-totals-2.csv")
+
+#DELETE UNNECESSARY COLUMNS FROM NC POPULATION DATA
+nc_population_data_by_county <- nc_population_data_by_county %>%
+  select(-Variable, -`Council of Government Region`, -`Metropolitan Statistical Area (2013)`, -Vintage, -`Estimate/Projection`)
+
+#LEFT JOIN NC POPULATION AND MASK DATA BY FIPS
+nyt_covid_rates_with_population_by_nc_county_during_mask_study <- nyt_covid_rates_by_nc_county_with_mask_study %>%
+  left_join(nc_population_data_by_county, by = "fips")
+
+#RENAME VALUE TO POPULATION IN DATA
+nyt_covid_rates_with_population_data_by_nc_county_during_mask_study <- nyt_covid_rates_with_population_by_nc_county_during_mask_study %>%
+  rename(Population = Value)
+
+#IMPORT RECENT WASTEWATER DATA NC BY COUNTY 
+recent_wastewater_data_by_county <- import ("~/Desktop/ENABLE/ENABLE mask ban analysis/ENABLE-mask-ban-/Data/waste water data/latest.csv")
+
+#DELETE REPEATED COUNTY COLUMN FROM MAIN DATA
+nyt_covid_rates_with_population_data_by_nc_county_during_mask_study <- nyt_covid_rates_with_population_data_by_nc_county_during_mask_study %>%
+  select(-county)
