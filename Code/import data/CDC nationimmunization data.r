@@ -9,8 +9,8 @@ CDC_nc_Immunization_data_2024 <- CDC_National_Immunization_data_2024 %>%
 CDC_data_2024 <- CDC_nc_Immunization_data_2024 %>%
   janitor::clean_names()
 
-#FILTER CDC DATA
-CDC_data_current <- CDC_data_2024 %>%
+#FILTER CDC DATA INDICATOR CATEGORIES
+CDC_data <- CDC_data_2024 %>%
   filter(indicator_category == "Healthcare provider recommended I get a COVID-19 vaccine"|
   indicator_category == "Concerned about COVID-19 disease"|
   indicator_category == "Received a 2023-2024 COVID-19 vaccine dose (among all adults 18+)"|
@@ -18,3 +18,7 @@ CDC_data_current <- CDC_data_2024 %>%
   indicator_category == "Probably will get a second dose of the updated COVID-19 vaccine or unsure (among adults 65+ with >= 1 dose)"|
   indicator_category == "Received two doses of the 2023-2024 COVID-19 vaccine (among adults 65+)"|
   indicator_category == "Received a 2023-2024 COVID-19 vaccine dose (among all adults 18+)")
+
+#FILTER CDC DATA TIME PERIOD
+CDC_data_current <- CDC_data %>%
+  filter(time_period == "September 24 - October 28")
