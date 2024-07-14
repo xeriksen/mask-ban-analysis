@@ -7,17 +7,18 @@
 # 0. SETUP ----
 
 ## Load Packages
-pacman::p_load(dplyr, gtsummary, here)
+pacman::p_load(dplyr,gt, gtsummary, here, boot, tidyr, kintr)
 
 ## Specify here using i_am()
+setwd("~/Desktop/ENABLE/ENABLE mask ban analysis/ENABLE-mask-ban-")
 here::i_am("Code/02_summary_stats.r")
 
 ## Load in cleaned data. 
 ## If merged_data.csv is not in the cleaned_data folder, then run scripts/01_clean_data.r to create and save it, else load in the file
-if (!file.exists(here("cleaned_data", "merged_data.csv"))) {
-  source(here("scripts", "01_clean_data.r"))
+if (!file.exists(here("Data", "cleaned_data", "merged_data.csv"))) {
+  source(here("code", "01_clean_data.r"))
 }
-main_data <- read.csv(here("cleaned_data", "merged_data.csv"))
+main_data <- read.csv(here("data", "cleaned_data", "merged_data.csv"))
 
 # 1. SUMMARY STATISTICS ----
 
@@ -27,136 +28,121 @@ main_data <- read.csv(here("cleaned_data", "merged_data.csv"))
 summary(main_data)
 
 ### 1.1.2 Detailed Summary Stats
-main_data %>% 
-  select(date, cases, deaths, population, never, rarely, sometimes, frequently, always) %>%
-  tbl_summary(statistic = date ~ "({min}, {max})")
+
 
 ## 1.2 CDC Data ----
 
 ### 1.2.1 Summary Stats
-summary(CDC_data_current)
+summary(cdc_data_current)
 
-### 1.2.2 Detailed Summary Stats
-CDC_data_current %>% 
-  select(time_period, indicator_category) %>%
-  tbl_summary(statistic = time_period ~ "{max}",
-              indicator_category = c("Healthcare provider recommended I get a COVID-19 vaccine",
-                                     "Concerned about COVID-19 disease",
-                                     "Received a 2023-2024 COVID-19 vaccine dose (among all adults 18+)",
-                                     "Confidence that COVID-19 vaccine is important to protect me (somewhat or very important)",
-                                     "Probably will get a second dose of the updated COVID-19 vaccine or unsure (among adults 65+ with >= 1 dose)",
-                                     "Received two doses of the 2023-2024 COVID-19 vaccine (among adults 65+)",
-                                     "Received a 2023-2024 COVID-19 vaccine dose (among all adults 18+)"))
+### 1.2.2 Detailed Summary Stats: Organized by Group Names
+
+# Select relevant columns
+selected_data <- cdc_data_current %>%
+  select(group_name, indicator_category, estimate_percent)
+
+# Create summary statistics table
+cdc_groups_summary_table <- selected_data %>%
+  tbl_summary(
+    by = indicator_category,
+    
+    label = list(
+      indicator_category ~ "Indicator Category"
+    )
+  )
+
+# Display the summary table
+cdc_groups_summary_table
+
+### 1.2.3 Detailed Summary Stats: Organized by Group Names and Group Category
+
+# Select relevant columns
+selected_data <- cdc_data_current %>%
+  select(group_name, group_category, indicator_category, estimate_percent)
+
+# Create summary statistics table
+cdc_age_race_summary_table <- selected_data %>%
+  tbl_summary(
+    by = indicator_category,
+    statistic = all_continuous() ~ "{mean} ({sd})", # You can customize the statistics as needed
+    label = list(
+      indicator_category ~ "Indicator Category"
+    )
+  )
+
+# Display the summary table
+summary_table
+
+# Filter the data for the specified group_name
+filtered_data <- cdc_data_current %>%
+  filter(group_name == "Social Vulnerability Index (SVI) of county of residence")
+
+# Create summary statistics table
+summary_table <- filtered_data %>%
+  select(group_category, indicator_category, estimate_percent) %>%
+  tbl_summary(
+    by = indicator_category,
+    statistic = all_continuous() ~ "{mean} ({sd})", # Customize the statistics as needed
+    label = list(
+      indicator_category ~ "Indicator Category"
+    )
+  )
+summary_table
+
+
+
+# Select relevant columns
+selected_data <- cdc_data_current %>%
+  select(group_name, group_category, indicator_category, estimate_percent)
+
+# Create summary statistics table
+summary_table <- selected_data %>%
+  tbl_summary(
+    by = indicator_category,
+    statistic = all_continuous() ~ "{mean} ({sd})", # You can customize the statistics as needed
+    label = list(
+      indicator_category ~ "Indicator Category"
+    )
+  )
+
+# Display the summary table
+summary_table
+
+
+
+
+
+
+# Create pivot table
+pivot_table <- cdc_data_current %>%
+  group_by(indicator_category, group_category) %>%
+  summarize(estimate_percent = mean(estimate_percent, na.rm = TRUE), .groups = 'drop') %>%
+  pivot_wider(names_from = group_category, values_from = estimate_percent, values_fill = list(estimate_percent = "No data")) %>%
+  gt() %>%
+  sub_missing(
+    columns = everything(),
+    missing_text = "No data"
+  ) %>%
+  tab_header(
+    title = "CDC DATA"
+  ) %>%
+  tab_footnote(
+    footnote = "Time period: September 24 - October 28 2023",
+    locations = cells_column_labels(
+      columns = everything()
+    )
+  )
+
+# Display the pivot table
+pivot_table
+
+
 
 ## 1.3 Summary Table with N and % ----
 
-main_data %>% 
-  tbl_summary(statistic = all_continuous() ~ "{mean} ({sd})",
-              type = all_categorical() ~ "categorical")
-
-
-#GET SUMMARY STATS FOR MAIN DATA
-summary(main_data)
-
-#GET SUMMARY STATS FOR CDC DATA
-summary(CDC_data_current)
-
-#LOAD SUMMARY PACKAGE 
-library(gtsummary)
-
-  
-#GET SUMMARY STATS FOR MAIN DATA
-main_data %>% 
-  select(date, cases, deaths, population, never,rarely,sometimes, frequently, always) %>%
-  tbl_summary( statistic = date ~ "({min}, {max})")
-  
-#GET SUMMARY STATS FOR CDC DATA
-data=CDC_data_current %>% 
-  select(time_period, indicator_category) %>%)
-  tbl_summary( statistic = time_period ~ "{max})"
-               indicator_category= ("Healthcare provider recommended I get a COVID-19 vaccine",
-                                     "Concerned about COVID-19 disease",
-                                     "Received a 2023-2024 COVID-19 vaccine dose (among all adults 18+)",
-                                     "Confidence that COVID-19 vaccine is important to protect me (somewhat or very important)",
-                                     "Probably will get a second dose of the updated COVID-19 vaccine or unsure (among adults 65+ with >= 1 dose)",
-                                     "Received two doses of the 2023-2024 COVID-19 vaccine (among adults 65+)",
-                                     "Received a 2023-2024 COVID-19 vaccine dose (among all adults 18+)")
-               
 # Summary table with N and %
 main_data %>% 
   # select(date, indicator_category) %>%
   tbl_summary( statistic = all_continuous() ~ "{mean} ({sd})",
                type = all_categorical() ~ "categorical")
 
-
-
-library(dplyr)
-library(gtsummary)
-
-# GET SUMMARY STATS FOR MAIN DATA
-main_data %>%
-  select(date, cases, deaths, population, never, rarely, sometimes, frequently, always) %>%
-  tbl_summary(
-    statistic = date ~ "({min}, {max})",
-    label = list(
-      cases ~ "Cases",
-      deaths ~ "Deaths",
-      population ~ "Population",
-      never ~ "Never",
-      rarely ~ "Rarely",
-      sometimes ~ "Sometimes",
-      frequently ~ "Frequently",
-      always ~ "Always"
-    )
-  )
-
-# GET SUMMARY STATS FOR CDC DATA
-CDC_data_current %>%
-  select(time_period, indicator_category) %>%
-  tbl_summary(
-    statistic = time_period ~ "September 24 - October 28",
-    label = list(
-      indicator_category ~ "Indicator Category"
-    )
-  )
-
-library(dplyr)
-library(gtsummary)
-
-# GET SUMMARY STATS FOR CDC DATA
-CDC_data_current %>%
-  select(indicator_category, group_name) %>%
-  tbl_summary(
-    statistic = list(
-      indicator_category ~ "{n} ({p}%)"
-    ),
-    label = list(
-      indicator_category ~ "Indicator Category"|
-      group_name ~ "Group Name"
-
-    )
-  ) %>%
-  modify_header(label = "CDC DATA") %>% # Optional: customize header
-  modify_footnote(
-    all_stat_cols() ~ "Time period: September 24 - October 28"
-  )
-
-# Summary table with N and % for categorical variables
-main_data %>%
-  select(date, cases, deaths, population, never, rarely, sometimes, frequently, always) %>%
-  tbl_summary(
-    statistic = all_continuous() ~ "{mean} ({sd})",
-    statistic = all_categorical() ~ "{n} ({p}%)",
-    type = all_categorical() ~ "categorical",
-    label = list(
-      date ~ "Date",
-      cases ~ "Cases",
-      deaths ~ "Deaths",
-      population ~ "Population",
-      never ~ "Never",
-      rarely ~ "Rarely",
-      sometimes ~ "Sometimes",
-      frequently ~ "Frequently",
-      always ~ "Always"
-    )
-  )
