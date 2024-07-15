@@ -9,9 +9,11 @@
 # cmdstanr::install_cmdstan(cores = 2) # Use more cores to speed up
 
 ## Load Packages
+install.packages("pacman")
 pacman::p_load(rio,tidyverse, janitor, psych, gtsummary, here, readxl, pacman, EpiSewer, ggplot2, data.table, here)
 
 ## Use here() to set working directory by specifying i_am()
+setwd("~/Documents/GitHub/mask-ban-analysis/Code")
 here::i_am("Code/01_clean_data.r")
 
 # 1. LOAD AND PROCESS DATA ----
@@ -101,7 +103,47 @@ wastewater_data_by_county <- wastewater_data_by_county %>%
 wastewater_data_by_county <- wastewater_data_by_county %>%
   filter(date >= as.Date("2021-07-02") & date <= as.Date("2021-07-14"))
 
+## 1.7 CDC atlas risk factors Data ----
 
+### 1.7.1 Import Data
+cdc_risk_factors<- import(here("Data/raw_data/CDC_atlas_risk_factors.csv")) %>% 
+  janitor::clean_names()
+
+### 1.7.2 Filter to only keep NC Data
+cdc_risk_factors_nc <- cdc_risk_factors %>% 
+  filter(cnty_fips>= "37000"& cnty_fips <= "38000")
+
+### 1.7.3 Rename column cnty_fips to fips
+cdc_risks_nc <- cdc_risk_factors_nc %>% 
+  rename(fips = cnty_fips)
+
+### 1.7.4 Remove county name column 
+cdc_risks_nc <- cdc_risks_nc %>% 
+  select(-"display_name")
+
+## 1.8 Percent nonwhite population Data ----
+
+###1.8.1 Import Data
+percent_nonwhite_pop <- import(here("Data/raw_data/percent_nonwhite_pop.csv")) %>% 
+  janitor::clean_names()
+
+### 1.8.2 Filter to only keep NC Data
+nc_percent_nonwhite_pop <-percent_nonwhite_pop %>% 
+  filter(fips>= "37000" & fips<= "38000")
+
+## 1.9 Population density Data ----
+
+### 1.9.1 Import Data
+population_density <- import(here("Data/raw_data/population_density.csv")) %>% 
+  janitor::clean_names()
+
+### 1.9.2 Filter to only keep NC Data
+nc_population_density <-population_density %>% 
+  filter(fips>= "37000" & fips<= "38000")
+
+### 1.9.3 Remove county name column
+nc_population_density <- nc_population_density %>% 
+  select(-"name")
 
 # 2. MERGING DATA ----
 
@@ -110,11 +152,17 @@ wastewater_data_by_county <- wastewater_data_by_county %>%
 merged_data <- nyt_covid_rates_by_county %>%
   left_join(nyt_mask_use_by_county, by = "fips") %>%
   # left_join(cdc_immunization_data, by = "fips") %>%
-  left_join(nc_population_data_by_county, by = "fips") 
+  left_join(nc_population_data_by_county, by = "fips") %>% 
 # %>% left_join(wastewater_data_by_county, by = "county", "date") 
-## Wastewater has a lot of missing data for now, so it is causing issues. I will return to this later
+## Wastewater has a lot of missing data for now, so it is causing issues. I will return to this later 
+## NOT USING WASTEWATER ANYMORE
+  left_join(cdc_risks_nc, by = "fips") %>% 
+  left_join(nc_percent_nonwhite_pop, by = "fips") %>% 
+  left_join(nc_population_density, by = "fips")
 
-
+## 2.2 Add column for covid prevalance
+merged_data <- merged_data %>% 
+  mutate(prevalence = cases / population)
 
 # 3. SAVE CLEANED DATA ----
 
@@ -122,4 +170,4 @@ merged_data <- nyt_covid_rates_by_county %>%
 write_csv(merged_data, here("Data/cleaned_data/merged_data.csv"))
 
 ## Remove all other datasets
-# rm(list = ls()[!ls() %in% c("merged_data")])
+rm(list = ls()[!ls() %in% c("merged_data")])
