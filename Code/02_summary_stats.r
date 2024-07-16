@@ -7,10 +7,10 @@
 # 0. SETUP ----
 
 ## Load Packages
-pacman::p_load(dplyr,gt, gtsummary, here, boot, tidyr, kintr)
+pacman::p_load(dplyr,gt, gtsummary, here, boot, tidyr, kintr)-
 
 ## Specify here using i_am()
-setwd("~/Desktop/ENABLE/ENABLE mask ban analysis/ENABLE-mask-ban-")
+#setwd("~/Desktop/ENABLE/ENABLE mask ban analysis/ENABLE-mask-ban-")
 here::i_am("Code/02_summary_stats.r")
 
 ## Load in cleaned data. 
@@ -22,24 +22,38 @@ main_data <- read.csv(here("data", "cleaned_data", "merged_data.csv"))
 
 # 1. SUMMARY STATISTICS ----
 
-## 1.1 Main Data ----
+## 1.1 Merged Data ----
 
 ### 1.1.1 Summary Stats
-summary(main_data)
+summary(merged_data)
 
 ### 1.1.2 Detailed Summary Stats
+merged_data %>%
+  tbl_summary()
 
 
 ## 1.2 CDC Data ----
 
 ### 1.2.1 Summary Stats
-summary(cdc_data_current)
+summary(cdc_immunization_current)
 
 ### 1.2.2 Detailed Summary Stats: Organized by Group Names
 
 # Select relevant columns
-selected_data <- cdc_data_current %>%
+selected_data <- cdc_immunization_current %>%
   select(group_name, indicator_category, estimate_percent)
+
+#use selected data to create summary table
+cdc_groups_summary_table <- selected_data %>%
+  tbl_summary(
+    by = group_name,
+    label = list(
+      group_name ~ "Group Name"
+    )
+  )
+
+#view summary table
+cdc_groups_summary_table
 
 # Create summary statistics table
 cdc_groups_summary_table <- selected_data %>%
