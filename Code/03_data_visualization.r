@@ -23,40 +23,40 @@ main_data <- read.csv(here("data", "cleaned_data", "merged_data.csv"))
 
 # DATA VISUALIZATIONS
 
-## 1. NC Map Prevalence of Covid (07/02/2020-07/14/2020) ----
+## 1. NC Map Avg Prevalence of Covid (2020) ----
 
-### 1.1.1 Select Data for NC Map Prevalence --- 
-covid_prevalence_changes<-merged_data %>% 
-  select(fips, date, prevalence) %>%
-  spread(date, prevalence) %>%
+### 1.1 Select Data for NC Map Prevalence ----
+covid_prevalence_avg <-merged_data %>% 
+  select(fips, date, prevalence, avg_prevalence) %>%
+  spread(date, prevalence)
   
-### 1.1.2 Rename merged prevalence/date columns ----
-  rename(prevalence_2020_07_02 = `2020-07-02`, prevalence_2020_07_14 = `2020-07-14`) %>%
+### 1.2 Rename merged prevalence/date columns ----
+#  rename(prevalence_2020_07_02 = `2020-07-02`, prevalence_2020_07_14 = `2020-07-14`) %>%
   
-### 1.1.3 Calculate change in prevalance for map ----
-    mutate(change_in_prevalence = prevalence_2020_07_14 - prevalence_2020_07_02)
+### 1.3 Calculate change in prevalance for map ----
+#    mutate(change_in_prevalence = prevalence_2020_07_14 - prevalence_2020_07_02)
 
-### 1.1.4 Load NC counties shapefile ----
+### 1.4 Load NC counties shapefile ----
 # DONT KNOW THAT I WILL USE THIS WANT TO KEEP THE SHAPE FILE CODE IN CASE FOR LATER --
-nc_map_prevalence <- sf::st_read(system.file("shape/nc.shp", package= "sf")) %>% 
+nc_map<- sf::st_read(system.file("shape/nc.shp", package= "sf")) %>% 
 janitor::clean_names()
 
-### 1.1.5 Ensure character type of fips column remains an integer ----
-nc_map_prevalence <- nc_map_prevalence %>%
+### 1.5 Ensure character type of fips column remains an integer ----
+nc_map_prevalence <- nc_map %>%
   mutate(fips = as.integer(fips))
 
-### 1.1.6 Merge the prevalence data with the shapefile ----
+### 1.6 Merge the prevalence data with the shapefile ----
 nc_map_prevalence <- nc_map_prevalence %>%
-  left_join(covid_prevalence_changes, by = c("fips" = "fips"))
+  left_join(covid_prevalence_avg, by = c("fips" = "fips"))
 
-### 1.1.7 Plot the map ----
+### 1.7 Plot the map ----
 #-- DONT KNOW IF I WILL USE.. Don't like long and latitude, could figure out changing x & y --
 ggplot(nc_map_prevalence) +
-  geom_sf(aes(fill = change_in_prevalence)) +
-  scale_fill_viridis_c(option = "plasma", name = "Change in Prevalence") +
+  geom_sf(aes(fill = avg_prevalence)) +
+  scale_fill_viridis_c(option = "plasma", name = "Avg Prevalence") +
   theme_minimal() +
-  labs(title = "Change in COVID Prevalence in NC Counties",
-       subtitle = "From 2020-07-02 to 2020-07-14")+
+  labs(title = "Average COVID Prevalence in NC Counties",
+       subtitle = "In 2020")+
 #remove lat long
   theme(axis.text = element_blank(),
         axis.title = element_blank(),
@@ -64,6 +64,34 @@ ggplot(nc_map_prevalence) +
 #move legend to inside
   theme(legend.position = "bottom")
 
+
+## 2 NC Map povery rates (2019) ----
+
+### 2.1 Load NC counties shapefile ----
+nc_map<- sf::st_read(system.file("shape/nc.shp", package= "sf")) %>% 
+  janitor::clean_names()
+
+### 2.2 Ensure character type of fips column remains an integer ----
+nc_map_poverty <- nc_map %>%
+  mutate(fips = as.integer(fips))
+
+### 2.3 Merge the poverty data with the shapefile ----
+nc_map_poverty <- nc_map_poverty %>%
+  left_join(merged_data, by = c("fips" = "fips"))
+
+### 2.4 Plot the map ----
+ggplot(nc_map_poverty) +
+  geom_sf(aes(fill = prop_poverty)) +
+  scale_fill_viridis_c(option = "plasma", name = "Poverty Rates (%)") +
+  theme_minimal() +
+  labs(title = "Povery Rates in NC Counties",
+       subtitle = "Percent of Population Impoverished")+
+  #remove lat long
+  theme(axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank())+
+  #move legend to inside
+  theme(legend.position = "bottom")
 
 
 plot_usmap(include = c("NC"), data = covid_prevalence_changes, values = "change_in_prevalence", regions= "counties")+

@@ -58,8 +58,8 @@ nyt_covid_rates_by_county <- nyt_covid_rates_by_county %>%
   filter(state == "North Carolina")
 
 ### 1.3.3 Filter to date ranges
-nyt_covid_rates_by_county <- nyt_covid_rates_by_county %>%
-  filter(date >= as.Date("2020-07-02") & date <= as.Date("2020-07-14"))
+#nyt_covid_rates_by_county <- nyt_covid_rates_by_county %>%
+ # filter(date >= as.Date("2020-07-02") & date <= as.Date("2020-07-14"))
 
 ### 1.3.4 Delete unnecessary columns
 nyt_covid_rates_by_county <- nyt_covid_rates_by_county %>%
@@ -149,6 +149,12 @@ nc_population_density <-population_density %>%
 nc_population_density <- nc_population_density %>% 
   select(-"name")
 
+## 1.10. Mask adherence data by state ----
+
+### 1.10.1 Import Data
+mask_adherence_by_state <- import(here("Data/raw_data/mask_adherence_by_state.csv")) %>% 
+  janitor::clean_names()
+
 # 2. MERGING DATA ----
 
 ## 2.1 Left join all datasets by fips, in order that it was imported ----
@@ -168,7 +174,12 @@ merged_data <- nyt_covid_rates_by_county %>%
 merged_data <- merged_data %>%  
   mutate(prevalence = cases / population)
 
-## 2.3 Add column for change in covid prevalence ----
+## 2.3 Add column for avg prevalence by fips ----
+merged_data <- merged_data %>% 
+  group_by(fips) %>% 
+  mutate(summarize(avg_prevalence = mean(prevalence, na.rm = TRUE)))
+
+## 2.4 Add column for change in covid prevalence ----
 covid_prevalence_data <- merged_data %>% 
   select(fips, date, prevalence) %>%
   spread(date, prevalence) %>%
@@ -188,8 +199,8 @@ merged_data <- merged_data %>%
 write_csv(merged_data, here("Data/cleaned_data/merged_data.csv"))
 
 ## Remove all other datasets
-rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_data")])
+rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_current")])
 
 
-merged_data_unique <- merged_data %>%
-  distinct(fips, .keep_all = TRUE)
+#merged_data_unique <- merged_data %>%
+#  distinct(fips, .keep_all = TRUE)
