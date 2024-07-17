@@ -155,6 +155,7 @@ nc_population_density <- nc_population_density %>%
 mask_adherence_by_state <- import(here("Data/raw_data/mask_adherence_by_state.csv")) %>% 
   janitor::clean_names()
 
+
 # 2. MERGING DATA ----
 
 ## 2.1 Left join all datasets by fips, in order that it was imported ----

@@ -31,6 +31,11 @@ summary(merged_data)
 merged_data %>%
   tbl_summary()
 
+### 1.1.3 Correlation between poverty and covid prevalence
+# Calculate correlation
+correlation <- cor(merged_data$"prop_poverty", merged_data$"avg_prevalence", use = "complete.obs")
+print(paste("Correlation between poverty and covid prevalence: ", correlation))
+
 
 ## 1.2 CDC Data ----
 
