@@ -10,6 +10,8 @@ library(dplyr)
 library(ggplot2)
 library(sf)
 library(tidyr)
+library(corrplot)
+
 
 ##Specify here usiang i_am()
 # here::i_am("Code/03_data_visualiztion.r")
@@ -94,8 +96,74 @@ ggplot(nc_map_poverty) +
   theme(legend.position = "bottom")
 
 
+
+
+## 3. Create a coorelation matrix for the merged_data dataset that includes all the numeric columns ----
+
+### 3.1 create data frame with numeric columns from merged_data set ----
+Merged_Percents <- merged_data %>%
+  select("prop_poverty", "chd_hosp", "ob_prev_adj", "hypertension_hosp", "prop_diabetes", 
+         "prop_edu_less_high_school", "prop_edu_less_college", "prop_food_stamp_snap_recip", 
+         "median_hhi", "income_inequal", "prop_uninsured", "prop_medicaid_eligible", 
+         "pop_per_sq_mile", "housing_per_sq_mile", "avg_prevalence", "deaths", "combined_probability")
+
+### 3.3 find correlations between variables ----
+correlation_matrix <- cor(Merged_Percents, use = "pairwise.complete.obs")
+
+### 3.4 plot correlation matrix on heatmap ----
+cor_df <- melt(correlation_matrix)
+
+ ggplot(cor_df, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", high = "blue", mid = "white",
+                       midpoint = 0, limits = c(-1, 1),
+                       space = "Lab",
+                       name = "Correlation") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, size = 7, hjust = 1)) +
+  labs(title = "Correlation Heatmap") +
+  coord_fixed()
+
+### 3.5 Filter correlations above 0.5 ---
+high_Pcorrelations <- high_Pcorrelations %>%
+  filter(abs(value) > 0.5)
+
+### 3.6 Order the high correlations from lowest to highest ----
+high_Pcorrelations <- high_Pcorrelations %>%
+  arrange(desc(value))
+
+### 3.7 Print the high correlations ----
+print(high_Pcorrelations)
+
+
+
+
+correlation_matrix <- cor(c(fips, date, "never", "rarely", "sometimes", "frequently", "always", "population",
+                            "cases", "deaths", "prevalence", "avg_prevalence", "prop_poverty", "p_nonwhite", 
+                            "p_white", "prop_diabetes", "chd_hosp", "ob_prev_adj", "hypertension_hosp", 
+                            "prop_edu_less_high_school", "prop_edu_less_college", "prop_food_stamp_snap_recip", 
+                            "median_hhi", "income_inequal", "prop_uninsured", "prop_medicaid_eligible", 
+                            "pop_per_sq_mile", "housing_per_sq_mile","combined_probilities")) 
+                          use = "complete.obs")
+
+
+"fips", "date", "never", "rarely", "sometimes", "frequently", "always", 
+                      "population", "cases", "deaths", "prevalence", "avg_prevalence", "prop_poverty", 
+                      "p_nonwhite", "p_white", "prop_diabetes", "chd_hosp", "ob_prev_adj", 
+                      "hypertension_hosp", "prop_edu_less_high_school", "prop_edu_less_college", 
+                      "prop_food_stamp_snap_recip", "median_hhi", "income_inequal", "prop_uninsured", 
+                      "prop_medicaid_eligible", "pop_per_sq_mile", "housing_per_sq_mile")
+
+
+
+
+print columns of merged_data
+print(colnames(merged_data))
 plot_usmap(include = c("NC"), data = covid_prevalence_changes, values = "change_in_prevalence", regions= "counties")+
            scale_fill_continuous(low= "white", high = "blue", name = "Prevalence of Covid", label= scales::comma)+
             labs(title = "Change in Covid-19 Prevalance in NC Counties", subtitle = "Data from July 2, 2020 to July 14, 2020 Adjusted for Population")+
             theme(legend.position = "right")
 
+
+
+###PATCHWORK (IN GGPLOT LECTURE) ----

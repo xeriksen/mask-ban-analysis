@@ -13,7 +13,7 @@
 #pacman::p_load(rio,tidyverse, janitor, psych, gtsummary, here, readxl, pacman, EpiSewer, ggplot2, data.table, here)
 
 ## Use here() to set working directory by specifying i_am()
-setwd("~/Documents/GitHub/mask-ban-analysis/Code")
+#setwd("~/Documents/GitHub/mask-ban-analysis/Code")
 here::i_am("Code/01_clean_data.r")
 
 # 1. LOAD AND PROCESS DATA ----
@@ -27,6 +27,10 @@ nyt_mask_use_by_county <- import(here("Data/raw_data/mask-use-by-county.csv")) %
 ### 1.1.2 Rename Column
 nyt_mask_use_by_county <- nyt_mask_use_by_county %>%
   rename(fips = countyfp)
+
+### 1.1.3 Filter to only keep NC Data
+nyt_mask_use_by_county <- nyt_mask_use_by_county %>%
+  filter(fips >= "37000" & fips < "38000")
 
 ## 1.2 NYTimes Data - County Info ----
 ## You don't actually need this since you're getting so much from the 2020 rates dataset, it is exactly the same.
@@ -96,33 +100,33 @@ nc_population_data_by_county <- nc_population_data_by_county %>%
 ## 1.6 Recent Wastewater Data ----
 
 ### 1.6.1 Import Data
-wastewater_data_by_county <- import(here("Data/raw_data/wastewater_latest.csv")) %>%
-  janitor::clean_names() 
+#wastewater_data_by_county <- import(here("Data/raw_data/wastewater_latest.csv")) %>%
+#  janitor::clean_names() 
 
 ### 1.6.2 Rename county_names to county
-wastewater_data_by_county <- wastewater_data_by_county %>%
-  rename(county = county_names, date = date_new)
+#wastewater_data_by_county <- wastewater_data_by_county %>%
+#  rename(county = county_names, date = date_new)
 
 ### 1.6.3 Filter to only keep dates
-wastewater_data_by_county <- wastewater_data_by_county %>%
-  filter(date >= as.Date("2021-07-02") & date <= as.Date("2021-07-14"))
+#wastewater_data_by_county <- wastewater_data_by_county %>%
+#  filter(date >= as.Date("2021-07-02") & date <= as.Date("2021-07-14"))
 
-## 1.7 CDC atlas risk factors Data ----
+## 1.7 CDC risk factors Data ----
 
 ### 1.7.1 Import Data
-cdc_risk_factors<- import(here("Data/raw_data/CDC_atlas_risk_factors.csv")) %>% 
+cdc_risk_factors <- import(here("Data/raw_data/CDC_atlas_risk_factors.csv")) %>% 
   janitor::clean_names()
 
 ### 1.7.2 Filter to only keep NC Data
-cdc_risk_factors_nc <- cdc_risk_factors %>% 
-  filter(cnty_fips>= "37000"& cnty_fips <= "38000")
-
-### 1.7.3 Rename column cnty_fips to fips
-cdc_risks_nc <- cdc_risk_factors_nc %>% 
+cdc_risk_factors <- cdc_risk_factors %>% 
   rename(fips = cnty_fips)
 
+### 1.7.3 Rename column cnty_fips to fips
+cdc_risk_nc <- cdc_risk_factors %>% 
+  filter(fips>= "37000"& fips < "38000")
+
 ### 1.7.4 Remove county name column 
-cdc_risks_nc <- cdc_risks_nc %>% 
+cdc_risk_nc <- cdc_risk_nc %>% 
   select(-"display_name")
 
 ## 1.8 Percent nonwhite population Data ----
@@ -155,6 +159,11 @@ nc_population_density <- nc_population_density %>%
 mask_adherence_by_state <- import(here("Data/raw_data/mask_adherence_by_state.csv")) %>% 
   janitor::clean_names()
 
+### 1.10.2 Filter to only keep NC policy Data
+nc_mask_adherence <- mask_adherence_by_state %>% 
+  filter(state == "North Carolina") %>% 
+  select("end_stay_home", "mask_pol_start")
+
 
 # 2. MERGING DATA ----
 
@@ -167,31 +176,13 @@ merged_data <- nyt_covid_rates_by_county %>%
 # %>% left_join(wastewater_data_by_county, by = "county", "date") 
 ## Wastewater has a lot of missing data for now, so it is causing issues. I will return to this later 
 ## NOT USING WASTEWATER ANYMORE
-  left_join(cdc_risks_nc, by = "fips") %>% 
+#  left_join(county_risk_factors_nc, by = "fips")
+  left_join(cdc_risk_nc, by = "fips") %>% 
   left_join(nc_percent_nonwhite_pop, by = "fips") %>% 
   left_join(nc_population_density, by = "fips")
 
-## 2.2 Add column for covid prevalence ----
-merged_data <- merged_data %>%  
-  mutate(prevalence = cases / population)
 
-## 2.3 Add column for avg prevalence by fips ----
-merged_data <- merged_data %>% 
-  group_by(fips) %>% 
-  mutate(summarize(avg_prevalence = mean(prevalence, na.rm = TRUE)))
-
-## 2.4 Add column for change in covid prevalence ----
-covid_prevalence_data <- merged_data %>% 
-  select(fips, date, prevalence) %>%
-  spread(date, prevalence) %>%
-  rename(prevalence_2020_07_02 = `2020-07-02`, prevalence_2020_07_14 = `2020-07-14`) %>%
-  mutate(change_in_prevalence = prevalence_2020_07_14 - prevalence_2020_07_02)
-
-#left join new column to merged data
-merged_data <- merged_data %>%
-  left_join(covid_prevalence_data %>% 
-  select(fips, change_in_prevalence), by = "fips") 
-
+#NYT 
 
   
 # 3. SAVE CLEANED DATA ----
@@ -200,7 +191,7 @@ merged_data <- merged_data %>%
 write_csv(merged_data, here("Data/cleaned_data/merged_data.csv"))
 
 ## Remove all other datasets
-rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_current")])
+rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_current", "nc_mask_adherence")])
 
 
 #merged_data_unique <- merged_data %>%
