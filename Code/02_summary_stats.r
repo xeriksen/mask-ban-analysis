@@ -169,14 +169,17 @@ correlation <- cor(merged_data$"p_white", merged_data$"avg_prevalence", use = "c
 print(paste("Correlation between percent white population and covid prevalence: ", correlation))
 
 
+### 1.2.18 masking prevalence and change in covid prevalence----
+# Calculate correlation
+correlation <- cor(merged_data$"combined_probability", merged_data$"change_in_prevalence.x", use = "complete.obs")
+print(paste("Correlation between masking prevalence and change in covid prevalence: ", correlation))
+
 ### 1.2.18 masking prevalence----
 # Calculate correlation
-#correlation <- cor(merged_data$"combined_probability", merged_data$"change_in_prevalence.x", use = "complete.obs")
-#print(paste("Correlation between masking prevalence and covid prevalence: ", correlation))
+correlation <- cor(merged_data$"combined_probability", merged_data$"avg_prevalence", use = "complete.obs")
+print(paste("Correlation between masking prevalence and change in covid prevalence: ", correlation))
 
-### 1.2.19 frequently or always wearing mask----
-# Sum the percentages of the population wearing masks frequently or always
-merged_data$mask_wearing_freq_always <- merged_data$frequently + merged_data$always
+
 
 # Calculate the correlation
 correlation <- cor(merged_data$mask_wearing_freq_always, merged_data$change_in_prevalence.x, use = "complete.obs")
@@ -184,68 +187,7 @@ correlation <- cor(merged_data$mask_wearing_freq_always, merged_data$change_in_p
 # Print the result
 print(paste("Correlation between percent of population wearing mask frequently or always and COVID-19 prevalence: ", correlation))
 
-
 ## 1.3 Covid nyt mask Stats----
-# 
-# ### 1.3.1: Calculate the probabilities for each mask adherence category ----
-# mask_use_by_county <- nyt_mask_use_by_county %>%
-#   rowwise() %>%
-#   mutate(
-#     prob_never = never,
-#     prob_rarely = rarely,
-#     prob_sometimes = sometimes,
-#     prob_frequently = frequently,
-#     prob_always = always
-#   ) %>%
-#   ungroup()
-# 
-# ### 1.3.2: Function to simulate the mask adherence for a set of four people with sampling ----
-# simulate_4_people <- function(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always) {
-#   adherence <- sample(c("never", "rarely", "sometimes", "frequently", "always"),
-#                       size = 4,
-#                       replace = TRUE,
-#                       prob = c(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always))
-#   return(adherence)
-# }
-# 
-# ### 1.3.3: Apply the simulation for each county, ten times, and combine results ----
-# set.seed(123)  # For reproducibility
-# simulated_data <- mask_use_by_county %>%
-#   rowwise() %>%
-#   mutate(
-#     simulations = list(replicate(10, simulate_4_people(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always), simplify = FALSE))
-#   ) %>%
-#   ungroup()
-# 
-# ### 1.3.4: Calculate the likelihood of all people in the sample being masked and combine the results ----
-# simulated_data <- simulated_data %>%
-#   rowwise() %>%
-#   mutate(
-#     both_masked_counts = sum(sapply(simulations, function(sim) all(sim %in% c("frequently", "always")))),
-#     avg_mask_likelihood = all_masked_counts / 10 * 100
-#   ) %>%
-#   ungroup()
-# 
-# ### 1.3.5 View the results ----
-# print(simulated_data %>% select(fips, avg_mask_likelihood))
-# 
-# ### 1.3.6 left join new column to merged data
-# merged_data <- merged_data %>%
-#   left_join(simulated_data %>% 
-#               select(fips, avg_mask_likelihood), by = "fips") 
-# 
-# ### 1.3.7 Calculate correlation between mask adherence and covid prevalence
-# correlation <- cor(merged_data$"avg_mask_likelihood", merged_data$"avg_prevalence", use = "complete.obs")
-# print(paste("Correlation between mask adherence and covid prevalence: ", correlation))
-
-# 
-# 
-# # Load necessary libraries
-# library(dplyr)
-# 
-# ## 1.3 Covid nyt mask Stats----
-# 
-# Assuming merged_data is already loaded and has the necessary columns
 
 ### 1.3.1: Calculate the probabilities for each mask adherence category ----
 merged_data <- merged_data %>%
@@ -259,7 +201,7 @@ merged_data <- merged_data %>%
   ) %>%
   ungroup()
 
-### 1.3.2: Function to simulate the mask adherence for a set of 10 people with sampling ----
+### 1.3.2: Create a function to simulate the mask adherence for a set of 10 people with sampling ----
 simulate_100_people <- function(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always) {
   adherence <- sample(c("never", "rarely", "sometimes", "frequently", "always"),
                       size = 10,
@@ -289,20 +231,20 @@ simulated_data <- simulated_data %>%
 ### 1.3.5: View the results ----
 print(simulated_data %>% select(fips, avg_mask_likelihood))
 
-# ### 1.3.6: Left join new column to merged data
-# merged_data <- merged_data %>%
-#   left_join(simulated_data %>%
-#               select(fips, avg_mask_likelihood), by = "fips")
-# 
-# # Check if the column has been added and is numeric
-# str(merged_data$avg_mask_likelihood)
+### 1.3.6: Left join new column to merged data
+ merged_data <- merged_data %>%
+   left_join(simulated_data %>%
+               select(fips, avg_mask_likelihood), by = "fips")
+ 
+ # Check if the column has been added and is numeric
+ str(merged_data$avg_mask_likelihood)
 
-# ### 1.3.7: Calculate correlation between mask adherence and covid prevalence
-# # Ensure both columns are numeric
-# merged_data$avg_mask_likelihood <- as.numeric(merged_data$avg_mask_likelihood)
-# 
-# correlation <- cor(merged_data$avg_mask_likelihood, merged_data$avg_prevalence, use = "complete.obs")
-# print(paste("Correlation between mask adherence and covid prevalence: ", correlation))
+### 1.3.7: Calculate correlation between mask adherence and covid prevalence (NULL: -0.0475335676764584")
+# Ensure both columns are numeric
+ merged_data$avg_mask_likelihood <- as.numeric(merged_data$avg_mask_likelihood)
+ 
+ correlation <- cor(merged_data$avg_mask_likelihood, merged_data$avg_prevalence, use = "complete.obs")
+ print(paste("Correlation between mask adherence and covid prevalence: ", correlation))
 
 
 # 

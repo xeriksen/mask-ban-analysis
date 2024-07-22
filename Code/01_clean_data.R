@@ -10,11 +10,11 @@
 
 ## Load Packages
 #install.packages("pacman")
-#pacman::p_load(rio,tidyverse, janitor, psych, gtsummary, here, readxl, pacman, EpiSewer, ggplot2, data.table, here)
+pacman::p_load(rio,tidyverse, janitor, psych, gtsummary, here, readxl, pacman, EpiSewer, ggplot2, data.table, here)
 
 ## Use here() to set working directory by specifying i_am()
-setwd("~/Documents/GitHub/mask-ban-analysis/Code")
-#here::i_am("Code/01_clean_data.r")
+#setwd("~/Documents/GitHub/mask-ban-analysis/Code")
+here::i_am("Code/01_clean_data.r")
 
 # 1. LOAD AND PROCESS DATA ----
 
@@ -160,39 +160,10 @@ mask_adherence_by_state <- import(here("Data/raw_data/mask_adherence_by_state.cs
 
 ### 1.10.2 Filter to only keep NC policy Data
 nc_mask_adherence <- mask_adherence_by_state %>% 
-  filter(state == "North Carolina") #%>% 
-#  select("end_stay_home", "mask_pol_start")
+  filter(State == "North Carolina") %>% 
+  select("EndStayHome", "MaskPolStart", "DistancePolicy") %>% 
+  janitor::clean_names()
 
-# Extract relevant columns for mask adherence
-mask_adherence <- nc_mask_adherence %>%
-  select(State, adh_AUGavg, adh_JULavg, adh_JUNEavg, adh_MAYavg, adh_APRavg)
-
-# extract case_rate columns as well
-# case_rate <- data %>%
-#   select(State, case_AUG, case_JUL, case_JUNE, case_MAY, case_APR)
-
-# Reshape the data for easier comparison
-mask_adherence_long <- mask_adherence %>%
-  pivot_longer(cols = starts_with("adh_"), 
-               names_to = "Month", 
-               values_to = "Adherence") %>%
-  mutate(Month = gsub("adh_", "", Month))
-
-# If case_rate data is present, reshape it similarly
-# case_rate_long <- case_rate %>%
-#   pivot_longer(cols = starts_with("case_"), 
-#                names_to = "Month", 
-#                values_to = "CaseRate") %>%
-#   mutate(Month = gsub("case_", "", Month))
-
-# Merge the two datasets for comparison
-# combined_data <- merge(mask_adherence_long, case_rate_long, by = c("State", "Month"))
-
-# Print the reshaped mask adherence data
-print(mask_adherence_long)
-
-# If case_rate data is present, print the combined data
-# print(combined_data)
 
 
 # 2. MERGING DATA ----
