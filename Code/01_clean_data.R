@@ -13,8 +13,8 @@
 #pacman::p_load(rio,tidyverse, janitor, psych, gtsummary, here, readxl, pacman, EpiSewer, ggplot2, data.table, here)
 
 ## Use here() to set working directory by specifying i_am()
-#setwd("~/Documents/GitHub/mask-ban-analysis/Code")
-here::i_am("Code/01_clean_data.r")
+setwd("~/Documents/GitHub/mask-ban-analysis/Code")
+#here::i_am("Code/01_clean_data.r")
 
 # 1. LOAD AND PROCESS DATA ----
 
@@ -156,13 +156,43 @@ nc_population_density <- nc_population_density %>%
 ## 1.10. Mask adherence data by state ----
 
 ### 1.10.1 Import Data
-mask_adherence_by_state <- import(here("Data/raw_data/mask_adherence_by_state.csv")) %>% 
-  janitor::clean_names()
+mask_adherence_by_state <- import(here("Data/raw_data/mask_adherence_by_state.csv"))
 
 ### 1.10.2 Filter to only keep NC policy Data
 nc_mask_adherence <- mask_adherence_by_state %>% 
-  filter(state == "North Carolina") %>% 
-  select("end_stay_home", "mask_pol_start")
+  filter(state == "North Carolina") #%>% 
+#  select("end_stay_home", "mask_pol_start")
+
+# Extract relevant columns for mask adherence
+mask_adherence <- nc_mask_adherence %>%
+  select(State, adh_AUGavg, adh_JULavg, adh_JUNEavg, adh_MAYavg, adh_APRavg)
+
+# extract case_rate columns as well
+# case_rate <- data %>%
+#   select(State, case_AUG, case_JUL, case_JUNE, case_MAY, case_APR)
+
+# Reshape the data for easier comparison
+mask_adherence_long <- mask_adherence %>%
+  pivot_longer(cols = starts_with("adh_"), 
+               names_to = "Month", 
+               values_to = "Adherence") %>%
+  mutate(Month = gsub("adh_", "", Month))
+
+# If case_rate data is present, reshape it similarly
+# case_rate_long <- case_rate %>%
+#   pivot_longer(cols = starts_with("case_"), 
+#                names_to = "Month", 
+#                values_to = "CaseRate") %>%
+#   mutate(Month = gsub("case_", "", Month))
+
+# Merge the two datasets for comparison
+# combined_data <- merge(mask_adherence_long, case_rate_long, by = c("State", "Month"))
+
+# Print the reshaped mask adherence data
+print(mask_adherence_long)
+
+# If case_rate data is present, print the combined data
+# print(combined_data)
 
 
 # 2. MERGING DATA ----
@@ -191,7 +221,7 @@ merged_data <- nyt_covid_rates_by_county %>%
 write_csv(merged_data, here("Data/cleaned_data/merged_data.csv"))
 
 ## Remove all other datasets
-rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_current", "nc_mask_adherence")])
+rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_current", "nc_mask_adherence", "nyt_mask_use_by_county")])
 
 
 #merged_data_unique <- merged_data %>%

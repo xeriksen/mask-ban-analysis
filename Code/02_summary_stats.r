@@ -171,165 +171,272 @@ print(paste("Correlation between percent white population and covid prevalence: 
 
 ### 1.2.18 masking prevalence----
 # Calculate correlation
-correlation <- cor(merged_data$"combined_probability", merged_data$"change_in_prevalence.x", use = "complete.obs")
-print(paste("Correlation between masking prevalence and covid prevalence: ", correlation))
+#correlation <- cor(merged_data$"combined_probability", merged_data$"change_in_prevalence.x", use = "complete.obs")
+#print(paste("Correlation between masking prevalence and covid prevalence: ", correlation))
+
+### 1.2.19 frequently or always wearing mask----
+# Sum the percentages of the population wearing masks frequently or always
+merged_data$mask_wearing_freq_always <- merged_data$frequently + merged_data$always
+
+# Calculate the correlation
+correlation <- cor(merged_data$mask_wearing_freq_always, merged_data$change_in_prevalence.x, use = "complete.obs")
+
+# Print the result
+print(paste("Correlation between percent of population wearing mask frequently or always and COVID-19 prevalence: ", correlation))
+
 
 ## 1.3 Covid nyt mask Stats----
+# 
+# ### 1.3.1: Calculate the probabilities for each mask adherence category ----
+# mask_use_by_county <- nyt_mask_use_by_county %>%
+#   rowwise() %>%
+#   mutate(
+#     prob_never = never,
+#     prob_rarely = rarely,
+#     prob_sometimes = sometimes,
+#     prob_frequently = frequently,
+#     prob_always = always
+#   ) %>%
+#   ungroup()
+# 
+# ### 1.3.2: Function to simulate the mask adherence for a set of four people with sampling ----
+# simulate_4_people <- function(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always) {
+#   adherence <- sample(c("never", "rarely", "sometimes", "frequently", "always"),
+#                       size = 4,
+#                       replace = TRUE,
+#                       prob = c(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always))
+#   return(adherence)
+# }
+# 
+# ### 1.3.3: Apply the simulation for each county, ten times, and combine results ----
+# set.seed(123)  # For reproducibility
+# simulated_data <- mask_use_by_county %>%
+#   rowwise() %>%
+#   mutate(
+#     simulations = list(replicate(10, simulate_4_people(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always), simplify = FALSE))
+#   ) %>%
+#   ungroup()
+# 
+# ### 1.3.4: Calculate the likelihood of all people in the sample being masked and combine the results ----
+# simulated_data <- simulated_data %>%
+#   rowwise() %>%
+#   mutate(
+#     both_masked_counts = sum(sapply(simulations, function(sim) all(sim %in% c("frequently", "always")))),
+#     avg_mask_likelihood = all_masked_counts / 10 * 100
+#   ) %>%
+#   ungroup()
+# 
+# ### 1.3.5 View the results ----
+# print(simulated_data %>% select(fips, avg_mask_likelihood))
+# 
+# ### 1.3.6 left join new column to merged data
+# merged_data <- merged_data %>%
+#   left_join(simulated_data %>% 
+#               select(fips, avg_mask_likelihood), by = "fips") 
+# 
+# ### 1.3.7 Calculate correlation between mask adherence and covid prevalence
+# correlation <- cor(merged_data$"avg_mask_likelihood", merged_data$"avg_prevalence", use = "complete.obs")
+# print(paste("Correlation between mask adherence and covid prevalence: ", correlation))
 
-# Calculate the probabilities for each masking behavior for each FIP code
-probabilities <- merged_data %>%
-  group_by(fips) %>%
-  summarise(across(c(never, rarely, sometimes, frequently, always), mean, na.rm = TRUE))
+# 
+# 
+# # Load necessary libraries
+# library(dplyr)
+# 
+# ## 1.3 Covid nyt mask Stats----
+# 
+# Assuming merged_data is already loaded and has the necessary columns
 
-# Define weights for each masking behavior
-weights <- c(never = 0, rarely = 0.25, sometimes = 0.5, frequently = 0.75, always = 1)
-
-# Calculate the combined probability for each FIP
-combined_probabilities <- probabilities %>%
-  rowwise() %>%
-  mutate(combined_probability = sum(c_across(never:always) * weights)) %>%
-  select(fips, combined_probability)
-
-# Display the combined probabilities
-print(combined_probabilities)
-
-#left join combined probabilities to merged data
+### 1.3.1: Calculate the probabilities for each mask adherence category ----
 merged_data <- merged_data %>%
-  left_join(combined_probabilities, by = "fips")
-
-## Remove all other datasets
-rm(list = ls()[!ls() %in% c("merged_data", "cdc_immunization_current", "nc_mask_adherence", "combined_probabilities")])
-
-# 2.0 CDC Data ----
-
-## 2.1 Summary Stats ----
-summary(cdc_immunization_current)
-
-### 2.2.1 Detailed Summary Stats: Organized by Group Names ----
-
-# Select relevant columns
-selected_data <- cdc_immunization_current %>%
-  select(group_name, indicator_category, estimate_percent)
-
-#use selected data to create summary table
-cdc_groups_summary_table <- selected_data %>%
-  tbl_summary(
-    by = group_name,
-    label = list(
-      group_name ~ "Group Name"
-    )
-  )
-
-#view summary table
-cdc_groups_summary_table
-
-# Create summary statistics table
-cdc_groups_summary_table <- selected_data %>%
-  tbl_summary(
-    by = indicator_category,
-    
-    label = list(
-      indicator_category ~ "Indicator Category"
-    )
-  )
-
-# Display the summary table
-cdc_groups_summary_table
-
-### 1.2.3 Detailed Summary Stats: Organized by Group Names and Group Category
-
-# Select relevant columns
-selected_data <- cdc_data_current %>%
-  select(group_name, group_category, indicator_category, estimate_percent)
-
-# Create summary statistics table
-cdc_age_race_summary_table <- selected_data %>%
-  tbl_summary(
-    by = indicator_category,
-    statistic = all_continuous() ~ "{mean} ({sd})", # You can customize the statistics as needed
-    label = list(
-      indicator_category ~ "Indicator Category"
-    )
-  )
-
-# Display the summary table
-summary_table
-
-# Filter the data for the specified group_name
-filtered_data <- cdc_data_current %>%
-  filter(group_name == "Social Vulnerability Index (SVI) of county of residence")
-
-# Create summary statistics table
-summary_table <- filtered_data %>%
-  select(group_category, indicator_category, estimate_percent) %>%
-  tbl_summary(
-    by = indicator_category,
-    statistic = all_continuous() ~ "{mean} ({sd})", # Customize the statistics as needed
-    label = list(
-      indicator_category ~ "Indicator Category"
-    )
-  )
-summary_table
-
-
-
-# Select relevant columns
-selected_data <- cdc_data_current %>%
-  select(group_name, group_category, indicator_category, estimate_percent)
-
-# Create summary statistics table
-summary_table <- selected_data %>%
-  tbl_summary(
-    by = indicator_category,
-    statistic = all_continuous() ~ "{mean} ({sd})", # You can customize the statistics as needed
-    label = list(
-      indicator_category ~ "Indicator Category"
-    )
-  )
-
-# Display the summary table
-summary_table
-
-
-
-
-
-
-# Create pivot table
-pivot_table <- cdc_data_current %>%
-  group_by(indicator_category, group_category) %>%
-  summarize(estimate_percent = mean(estimate_percent, na.rm = TRUE), .groups = 'drop') %>%
-  pivot_wider(names_from = group_category, values_from = estimate_percent, values_fill = list(estimate_percent = "No data")) %>%
-  gt() %>%
-  sub_missing(
-    columns = everything(),
-    missing_text = "No data"
+  rowwise() %>%
+  mutate(
+    prob_never = never,
+    prob_rarely = rarely,
+    prob_sometimes = sometimes,
+    prob_frequently = frequently,
+    prob_always = always
   ) %>%
-  tab_header(
-    title = "CDC DATA"
+  ungroup()
+
+### 1.3.2: Function to simulate the mask adherence for a set of 10 people with sampling ----
+simulate_100_people <- function(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always) {
+  adherence <- sample(c("never", "rarely", "sometimes", "frequently", "always"),
+                      size = 10,
+                      replace = TRUE,
+                      prob = c(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always))
+  return(adherence)
+}
+
+### 1.3.3: Apply the simulation for each county, a ten times, and combine results ----
+set.seed(123)  # For reproducibility
+simulated_data <- merged_data %>%
+  rowwise() %>%
+  mutate(
+    simulations = list(replicate(10, simulate_100_people(prob_never, prob_rarely, prob_sometimes, prob_frequently, prob_always), simplify = FALSE))
   ) %>%
-  tab_footnote(
-    footnote = "Time period: September 24 - October 28 2023",
-    locations = cells_column_labels(
-      columns = everything()
-    )
-  )
+  ungroup()
 
-# Display the pivot table
-pivot_table
-
-
-
-## 1.3 Summary Table with N and % ----
-
-# Summary table with N and %
-main_data %>% 
-  # select(date, indicator_category) %>%
-  tbl_summary( statistic = all_continuous() ~ "{mean} ({sd})",
-               type = all_categorical() ~ "categorical")
+### 1.3.4: Calculate the average likelihood of people in the sample being masked and combine the results ----
+simulated_data <- simulated_data %>%
+  rowwise() %>%
+  mutate(
+    avg_mask_likelihood = mean(unlist(sapply(simulations, function(sim) mean(sim %in% c("frequently", "always"))))) * 100
+  ) %>%
+  ungroup()
 
 
-## 3. Calculate mask adherence by county ----
-``
+### 1.3.5: View the results ----
+print(simulated_data %>% select(fips, avg_mask_likelihood))
+
+# ### 1.3.6: Left join new column to merged data
+# merged_data <- merged_data %>%
+#   left_join(simulated_data %>%
+#               select(fips, avg_mask_likelihood), by = "fips")
+# 
+# # Check if the column has been added and is numeric
+# str(merged_data$avg_mask_likelihood)
+
+# ### 1.3.7: Calculate correlation between mask adherence and covid prevalence
+# # Ensure both columns are numeric
+# merged_data$avg_mask_likelihood <- as.numeric(merged_data$avg_mask_likelihood)
+# 
+# correlation <- cor(merged_data$avg_mask_likelihood, merged_data$avg_prevalence, use = "complete.obs")
+# print(paste("Correlation between mask adherence and covid prevalence: ", correlation))
 
 
+# 
+# 
+# # 2.0 CDC Data ----
+# 
+# ## 2.1 Summary Stats ----
+# summary(cdc_immunization_current)
+# 
+# ### 2.2.1 Detailed Summary Stats: Organized by Group Names ----
+# 
+# # Select relevant columns
+# selected_data <- cdc_immunization_current %>%
+#   select(group_name, indicator_category, estimate_percent)
+# 
+# #use selected data to create summary table
+# cdc_groups_summary_table <- selected_data %>%
+#   tbl_summary(
+#     by = group_name,
+#     label = list(
+#       group_name ~ "Group Name"
+#     )
+#   )
+# 
+# #view summary table
+# cdc_groups_summary_table
+# 
+# # Create summary statistics table
+# cdc_groups_summary_table <- selected_data %>%
+#   tbl_summary(
+#     by = indicator_category,
+#     
+#     label = list(
+#       indicator_category ~ "Indicator Category"
+#     )
+#   )
+# 
+# # Display the summary table
+# cdc_groups_summary_table
+# 
+# ### 1.2.3 Detailed Summary Stats: Organized by Group Names and Group Category
+# 
+# # Select relevant columns
+# selected_data <- cdc_data_current %>%
+#   select(group_name, group_category, indicator_category, estimate_percent)
+# 
+# # Create summary statistics table
+# cdc_age_race_summary_table <- selected_data %>%
+#   tbl_summary(
+#     by = indicator_category,
+#     statistic = all_continuous() ~ "{mean} ({sd})", # You can customize the statistics as needed
+#     label = list(
+#       indicator_category ~ "Indicator Category"
+#     )
+#   )
+# 
+# # Display the summary table
+# summary_table
+# 
+# # Filter the data for the specified group_name
+# filtered_data <- cdc_data_current %>%
+#   filter(group_name == "Social Vulnerability Index (SVI) of county of residence")
+# 
+# # Create summary statistics table
+# summary_table <- filtered_data %>%
+#   select(group_category, indicator_category, estimate_percent) %>%
+#   tbl_summary(
+#     by = indicator_category,
+#     statistic = all_continuous() ~ "{mean} ({sd})", # Customize the statistics as needed
+#     label = list(
+#       indicator_category ~ "Indicator Category"
+#     )
+#   )
+# summary_table
+# 
+# 
+# 
+# # Select relevant columns
+# selected_data <- cdc_data_current %>%
+#   select(group_name, group_category, indicator_category, estimate_percent)
+# 
+# # Create summary statistics table
+# summary_table <- selected_data %>%
+#   tbl_summary(
+#     by = indicator_category,
+#     statistic = all_continuous() ~ "{mean} ({sd})", # You can customize the statistics as needed
+#     label = list(
+#       indicator_category ~ "Indicator Category"
+#     )
+#   )
+# 
+# # Display the summary table
+# summary_table
+# 
+# 
+# 
+# 
+# 
+# 
+# # Create pivot table
+# pivot_table <- cdc_data_current %>%
+#   group_by(indicator_category, group_category) %>%
+#   summarize(estimate_percent = mean(estimate_percent, na.rm = TRUE), .groups = 'drop') %>%
+#   pivot_wider(names_from = group_category, values_from = estimate_percent, values_fill = list(estimate_percent = "No data")) %>%
+#   gt() %>%
+#   sub_missing(
+#     columns = everything(),
+#     missing_text = "No data"
+#   ) %>%
+#   tab_header(
+#     title = "CDC DATA"
+#   ) %>%
+#   tab_footnote(
+#     footnote = "Time period: September 24 - October 28 2023",
+#     locations = cells_column_labels(
+#       columns = everything()
+#     )
+#   )
+# 
+# # Display the pivot table
+# pivot_table
+# 
+# 
+# 
+# ## 1.3 Summary Table with N and % ----
+# 
+# # Summary table with N and %
+# main_data %>% 
+#   # select(date, indicator_category) %>%
+#   tbl_summary( statistic = all_continuous() ~ "{mean} ({sd})",
+#                type = all_categorical() ~ "categorical")
+# 
+# 
+# ## 3. Calculate mask adherence by county ----
+# ``
+# 
+# 
