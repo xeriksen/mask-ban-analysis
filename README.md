@@ -1,5 +1,85 @@
 # ENABLE-mask-ban-
 
+Mask Ban Presentation Outline
+
+I. Introduction —short 
+
+•	A. Background and Context
+•	Overview of mask mandates and bans in the context of public health.
+•	Introduction to the North Carolina mask ban law.
+•	B. Objectives of the Study
+•	To predict the impact of the mask ban on immunocompromised individuals.
+•	To identify potential risks and outcomes.
+II. Literature Review
+
+•	A. Mask Mandates and Public Health
+•	Historical context and effectiveness of mask mandates.
+•	Previous studies on the impact of mask policies.
+•	The process of the mask bill becoming law
+•	B. Immunocompromised Individuals and COVID-19
+•	Definition and characteristics of immunocompromised individuals. Social determinants of health, etc 
+•	Vulnerability of immunocompromised individuals to COVID-19 and other respiratory infections.
+
+III. Methodology — include time periods 
+•	A. Data Collection
+•	Sources of data (e.g., CDC, New York Times , NC general assembly, etc ).
+•	Types of data collected (e.g., masking adherence, infection rates, mortality rates, county social determinants of health).
+•	B. Analytical Techniques
+•	Correlations between variables were calculated
+•	Statistical probability sampling with replacement using mask data.
+•	R studio software was used for analysis.
+•	C. Assumptions and Limitations
+•	Assumptions made in the predictive models.
+•	Potential limitations and biases in the study.
+
+IV. Predictive Analysis
+•	A. Current Situation Analysis
+•	Baseline data on infection rates among immunocompromised individuals before the mask ban.
+•	B. Model Predictions
+•	Predicted covid rates post mask ban 
+•	C. Scenario Analysis
+
+V. Results
+•	A. Summary of Findings
+•	Key results from predictive models.
+•	B. Interpretation of Results
+•	What the results suggest about the impact of the mask ban on immunocompromised individuals.
+•	C. Data Tables and Figures
+
+VI. Discussion
+•	A. Comparison with Other Studies
+•	Compare my data with other masking studies I have found
+•	B. Public Health Implications
+•	Potential public health impacts of the mask ban on north Carolinians 
+•	C. Ethical Considerations
+•	Ethical implications of enforcing or lifting mask mandates.
+
+VII. Conclusion
+•	A. Summary of Key Points
+•	Recap of the study's objectives, methodology, and findings.
+•	B. Future Research Directions
+•	Areas for further study and research gaps identified.
+•	C. Final Remarks
+•	Concluding thoughts on the importance of protecting vulnerable populations.
+
+VIII. Q&A Session
+•	Open floor for questions and discussions with the audience.
+
+References — add using QR code 
+•	Citing all sources used in the literature review and data analysis.
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## NC HB 237 Mask ban and campaign refinance bill
 
 ### project is focused specfically who the NCmask ban will affect the most 
