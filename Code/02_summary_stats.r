@@ -171,21 +171,21 @@ print(paste("Correlation between percent white population and covid prevalence: 
 
 ### 1.2.18 masking prevalence and change in covid prevalence----
 # Calculate correlation
-correlation <- cor(merged_data$"combined_probability", merged_data$"change_in_prevalence.x", use = "complete.obs")
-print(paste("Correlation between masking prevalence and change in covid prevalence: ", correlation))
+#correlation <- cor(merged_data$"combined_probability", merged_data$"change_in_prevalence.x", use = "complete.obs")
+#print(paste("Correlation between masking prevalence and change in covid prevalence: ", correlation))
 
 ### 1.2.18 masking prevalence----
 # Calculate correlation
-correlation <- cor(merged_data$"combined_probability", merged_data$"avg_prevalence", use = "complete.obs")
-print(paste("Correlation between masking prevalence and change in covid prevalence: ", correlation))
+#correlation <- cor(merged_data$"combined_probability", merged_data$"avg_prevalence", use = "complete.obs")
+#print(paste("Correlation between masking prevalence and change in covid prevalence: ", correlation))
 
-
-
+### 1.2.19: Frequently or always masking correlation with mask adherence and avg prevalence (NULL:-0.052178533698231) 
+# Sum the percentages of the population wearing masks frequently or always
+merged_data$mask_wearing_freq_always <- merged_data$frequently + merged_data$always
 # Calculate the correlation
-correlation <- cor(merged_data$mask_wearing_freq_always, merged_data$change_in_prevalence.x, use = "complete.obs")
-
-# Print the result
+correlation <- cor(merged_data$mask_wearing_freq_always, merged_data$avg_prevalence, use = "complete.obs")
 print(paste("Correlation between percent of population wearing mask frequently or always and COVID-19 prevalence: ", correlation))
+
 
 ## 1.3 Covid nyt mask Stats----
 
@@ -228,10 +228,10 @@ simulated_data <- simulated_data %>%
   ungroup()
 
 
-### 1.3.5: View the results ----
+### 1.3.5: View the resultsof simulation----
 print(simulated_data %>% select(fips, avg_mask_likelihood))
 
-### 1.3.6: Left join new column to merged data
+### 1.3.6: Left join new column to merged data----
  merged_data <- merged_data %>%
    left_join(simulated_data %>%
                select(fips, avg_mask_likelihood), by = "fips")
@@ -239,14 +239,97 @@ print(simulated_data %>% select(fips, avg_mask_likelihood))
  # Check if the column has been added and is numeric
  str(merged_data$avg_mask_likelihood)
 
-### 1.3.7: Calculate correlation between mask adherence and covid prevalence (NULL: -0.0475335676764584")
+### 1.3.7: Calculate correlation between mask adherence and covid prevalence (NULL: -0.0475335676764584") ====
 # Ensure both columns are numeric
  merged_data$avg_mask_likelihood <- as.numeric(merged_data$avg_mask_likelihood)
  
  correlation <- cor(merged_data$avg_mask_likelihood, merged_data$avg_prevalence, use = "complete.obs")
  print(paste("Correlation between mask adherence and covid prevalence: ", correlation))
 
+ 
+## 1.4 mask adherence covid rates linear regression attempt mask_wearing_freq_always ----
+ 
+ #### 1.4.1 Assuming merged_data has columns 'mask_wearing_freq_always' and 'avg_prevalence'----
+ model <- lm(avg_prevalence ~ mask_wearing_freq_always, data = merged_data)
+ 
+ ### 1.4.2 Summary of the model ----
+ summary(model)
+ 
+ ### 1.4.3 Plot the regression line ----
+ plot(merged_data$mask_wearing_freq_always, merged_data$avg_prevalence,
+      main = "Linear Regression of Mask-Wearing on COVID-19 Prevalence",
+      xlab = "Mask-Wearing (Frequently + Always)",
+      ylab = "COVID-19 Prevalence")
+ abline(model, col = "blue")
+ 
+ 
+ ## 1.5 mask adherence covid rates linear regression attempt always ----
+ 
+ ### 1.5.1 Assuming merged_data has columns 'mask_wearing_freq_always' and 'avg_prevalence'
+ model <- lm(avg_prevalence ~ always, data = merged_data)
+ 
+ ### 1.5.2 Summary of the model ----
+ summary(model)
+ 
+ ### 1.5.3 Plotting the regression line ----
+ plot(merged_data$always, merged_data$avg_prevalence,
+      main = "Linear Regression of Mask-Wearing on COVID-19 Prevalence",
+      xlab = "Mask-Wearing (Always)",
+      ylab = "COVID-19 Prevalence")
+ abline(model, col = "blue")
+ 
+ 
+ ## 1.6 mask adherence covid rates linear regression attempt frequently ----
+ 
+ ### 1.6.1 Assuming merged_data has columns 'frequently' and 'avg_prevalence' ----
+ model <- lm(avg_prevalence ~ always, data = merged_data)
+ 
+ ### 1.6.2 Summary of the model   ----
+ summary(model)
+ 
+ ### 1.6.3 Plotting the regression line ----
+ plot(merged_data$frequently, merged_data$avg_prevalence,
+      main = "Linear Regression of Mask-Wearing on COVID-19 Prevalence",
+      xlab = "Mask-Wearing (Frequently)",
+      ylab = "COVID-19 Prevalence")
+ abline(model, col = "blue")
+ 
+ 
+ ## 1.7 mask adherence covid rates linear regression attempt rarely ----
+ 
+ ### 1.7.1 Assuming merged_data has columns 'rarely' and 'avg_prevalence' ----
+ model <- lm(avg_prevalence ~ always, data = merged_data)
+ 
+ ### 1.7.2 Summary of the model   ----
+ summary(model)
+ 
+ ### 1.7.3 Plotting the regression line ----
+ plot(merged_data$rarely, merged_data$avg_prevalence,
+      main = "Linear Regression of Mask-Wearing on COVID-19 Prevalence",
+      xlab = "Mask-Wearing (Rarely)",
+      ylab = "COVID-19 Prevalence")
+ abline(model, col = "blue")
+ 
+ 
+ ## 1.8 mask adherence covid rates logistic regression attempt mask_wearing_freq_always----
+ 
+ ### 1.8. Convert to a high binary outcome for high prevalence
+ threshold <- median(merged_data$avg_prevalence) # Use median as a threshold for high/low prevalence
+ merged_data$high_prevalence <- ifelse(merged_data$avg_prevalence > threshold, 1, 0)
+ 
+ #### 1.8. Assuming merged_data has columns 'mask_wearing_freq_always' and 'avg_prevalence'----
+ model <- glm(avg_prevalence ~ mask_wearing_freq_always, data = merged_data, family = "binomial")
+ 
+ ### 1.8.2 Summary of the model ----
+ summary(model)
+ 
+ ### 1.8.3 Make predictor with the fitted model ----
+ merged_data$predicted_high_prevalence <- predict(model, type = "response")
+ 
+ ### 1.8.4 Convert prediction to bianry values (threshold 0.5)----
+ merged_data$predicted_high_prevalence <- ifelse(merged_data$predicted_high_prevalence > 0.5, 1, 0)
 
+ 
 # 
 # 
 # # 2.0 CDC Data ----
