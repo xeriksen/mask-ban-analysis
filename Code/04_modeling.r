@@ -17,7 +17,8 @@ if (!file.exists(here("Data", "cleaned_data", "merged_data.csv"))) {
 }
 main_data <- read.csv(here("data", "cleaned_data", "merged_data.csv"))
 
-
+# #save merged_data
+# write_csv(merged_data, here("data", "cleaned_data", "model_data.csv"))
 
 ## 1.1 Create filter dataset for modeling ----
 
