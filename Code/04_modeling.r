@@ -155,7 +155,7 @@ feature_imp %>%
   coord_flip() +
   theme_minimal() +
   labs(x = "Variables", y = "Variable Importance",
-       title = "Variable Importance in Random Forest Model") +
+       title = "Important Predictors of COVID-19 Prevalence") +
   # Multiple the importance by 10000 to make the values more interpretable 
   scale_y_continuous(labels = scales::number_format(scale = 1000000)) +
   theme(axis.text.y = element_text(size = 8))  # Adjust text size if needed
