@@ -1,10 +1,14 @@
 CITATIONS 
  
+Centers for Disease Control and Prevention [CDC]. (2023, June 27). COVID-19 vaccination coverage and vaccine confidence among adults. CDC. https://www.cdc.gov/vaccines/imz-managers/coverage/covidvaxview/interactive/adults.html
+
 Chin T, Kahn R, Li R, Chen JT, Krieger N, Buckee CO, Balsari S, and Kiang MV. US-county level variation in intersecting individual, household and community characteristics relevant to COVID-19 and planning an equitable response: a cross- sectional analysis. BMJ Open 2020;0:e039886. 
+
+Fischer, C. B., Adrien, N. Silguero, J. J., Hooper, J. J., Chowdhury, A. I., & Werner, M. M.. (2021). “Mask adherence and rate of COVID-19 across the United States.” National Library of Medicine. doi: https://doi.org/10.1371/journal.pone.0249891
 
 Katz, J., Sanger-Katz, M., & Quealy, K. (2020, July 17). “A detailed map of who is wearing masks in the U. S.” The New York Times.
 
-Fischer, C. B., Adrien, N. Silguero, J. J., Hooper, J. J., Chowdhury, A. I., & Werner, M. M.. (2021). “Mask adherence and rate of COVID-19 across the United States.” medRxiv. doi: https: doi.org/10.1101/2021.01.18.21250029
+
  
 Presentation photo links (all public domain) 
 
